@@ -403,7 +403,7 @@ var checkExist = setInterval(function() {
 
 		var viewed;
 		// load up the json file
-		var gameJSON = "https://rainbowsprinkles.com/feud/data/sampleGame.json";
+		var gameJSON = "http://8alls.com/feud/data/popquiz.json";
 
 
     	$.getJSON(gameJSON, function (data) {
@@ -446,7 +446,7 @@ var checkExist = setInterval(function() {
 		var boardNum = localStorage.getItem('viewingList');
 
 		// load up the json file
-		var gameJSON = "https://rainbowsprinkles.com/feud/data/sampleGame.json";
+		var gameJSON = "http://8alls.com/feud/data/pubquiz.json";
 
 
     	$.getJSON(gameJSON, function (data) {
