@@ -44,7 +44,7 @@ jQuery(function($) {
 		localStorage.setItem('turn', turn);
 
 		// load up the json file
-		var gameJSON = "https://rainbowsprinkles.com/feud/data/sampleGame.json";
+		var gameJSON = "http://8alls.com/feud/data/pubquiz.json";
 
 		// we're creating localstorage for each board to track views
 		$.getJSON(gameJSON, function (data) {
