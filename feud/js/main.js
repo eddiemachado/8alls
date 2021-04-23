@@ -403,7 +403,7 @@ var checkExist = setInterval(function() {
 
 		var viewed;
 		// load up the json file
-		var gameJSON = "http://8alls.com/feud/data/pubquiz.json";
+		var gameJSON = "https://8alls.com/feud/data/pubquiz.json";
 
 
     	$.getJSON(gameJSON, function (data) {
