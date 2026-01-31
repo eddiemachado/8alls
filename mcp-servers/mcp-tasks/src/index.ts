@@ -12,7 +12,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { createApiClient, Task } from '@8alls/api-client';
+import { createApiClient } from '@8alls/api-client';
 
 // Initialize API client
 const api = createApiClient({
@@ -162,6 +162,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
+  // Ensure args is defined
+  const toolArgs = args || {};
+
   try {
     switch (name) {
       case 'list_tasks': {
@@ -177,7 +180,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'get_task': {
-        const task = await api.getTask(args.id as string);
+        const task = await api.getTask(toolArgs.id as string);
         return {
           content: [
             {
@@ -190,12 +193,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'create_task': {
         const newTask = await api.createTask({
-          title: args.title as string,
-          description: args.description as string | undefined,
+          title: toolArgs.title as string,
+          description: toolArgs.description as string | undefined,
           completed: false,
-          priority: args.priority as 'low' | 'medium' | 'high',
-          dueDate: args.dueDate as string | undefined,
-          tags: args.tags as string[] | undefined,
+          priority: toolArgs.priority as 'low' | 'medium' | 'high',
+          dueDate: toolArgs.dueDate as string | undefined,
+          tags: toolArgs.tags as string[] | undefined,
         });
         return {
           content: [
@@ -208,12 +211,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'update_task': {
-        const updatedTask = await api.updateTask(args.id as string, {
-          title: args.title as string | undefined,
-          description: args.description as string | undefined,
-          completed: args.completed as boolean | undefined,
-          priority: args.priority as 'low' | 'medium' | 'high' | undefined,
-          dueDate: args.dueDate as string | undefined,
+        const updatedTask = await api.updateTask(toolArgs.id as string, {
+          title: toolArgs.title as string | undefined,
+          description: toolArgs.description as string | undefined,
+          completed: toolArgs.completed as boolean | undefined,
+          priority: toolArgs.priority as 'low' | 'medium' | 'high' | undefined,
+          dueDate: toolArgs.dueDate as string | undefined,
         });
         return {
           content: [
@@ -226,19 +229,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'delete_task': {
-        await api.deleteTask(args.id as string);
+        await api.deleteTask(toolArgs.id as string);
         return {
           content: [
             {
               type: 'text',
-              text: `Task ${args.id} deleted successfully!`,
+              text: `Task ${toolArgs.id} deleted successfully!`,
             },
           ],
         };
       }
 
       case 'search_tasks': {
-        const results = await api.search(args.query as string);
+        const results = await api.search(toolArgs.query as string);
         return {
           content: [
             {
