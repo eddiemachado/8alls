@@ -2,25 +2,30 @@
 
 ## Overview
 
-The 8alls design system uses **Style Dictionary** to generate platform-specific design tokens from a single source of truth (JSON files). This ensures consistency across web, iOS, Android, and other platforms.
+The 8alls design system generates platform-specific design tokens from a single source of truth (JSON files). This ensures consistency across web, iOS, Android, and other platforms.
+
+- **Web tokens**: Generated via Style Dictionary
+- **iOS tokens**: Generated via custom Node.js script ([scripts/generate-swift-tokens.js](./scripts/generate-swift-tokens.js))
 
 ## Architecture
 
 ```
 packages/design-tokens/
-├── tokens/              # Source of truth - JSON token definitions
+├── tokens/                       # Source of truth - JSON token definitions
 │   ├── colors.json
 │   ├── spacing.json
 │   ├── typography.json
 │   └── animation.json
-├── dist/                # Generated platform-specific outputs
+├── scripts/
+│   └── generate-swift-tokens.js  # Custom Swift token generator
+├── dist/                         # Generated platform-specific outputs
 │   ├── web/
-│   │   ├── variables.css       # CSS custom properties
-│   │   ├── tokens.js           # JavaScript module
-│   │   └── tokens.d.ts         # TypeScript declarations
+│   │   ├── variables.css         # CSS custom properties
+│   │   ├── tokens.js             # JavaScript module
+│   │   └── tokens.d.ts           # TypeScript declarations
 │   └── ios/
-│       └── DesignTokens.swift  # Swift constants
-├── style-dictionary.config.js  # Build configuration
+│       └── DesignTokens.swift    # Swift constants (custom generated)
+├── style-dictionary.config.js    # Style Dictionary config (web only)
 └── package.json
 ```
 
@@ -57,19 +62,27 @@ npm run build
 ```
 
 This generates:
-- CSS variables for web
-- JavaScript/TypeScript modules for web
-- Swift constants for iOS
+- CSS variables for web (Style Dictionary)
+- JavaScript/TypeScript modules for web (Style Dictionary)
+- Swift constants for iOS (custom script)
 
 ### Build Specific Platforms
 
 ```bash
-# Web only (CSS + JS)
+# Web only (CSS + JS via Style Dictionary)
 npm run generate:tokens:web
 
-# iOS only (Swift)
+# iOS only (Swift via custom Node.js script)
 npm run generate:tokens:ios
 ```
+
+**Why a custom script for Swift?**
+Style Dictionary v4's built-in Swift format has limitations:
+- No automatic unit conversion (rem→CGFloat, ms→TimeInterval)
+- Incorrect syntax for hex colors
+- Limited type safety
+
+Our custom script ([scripts/generate-swift-tokens.js](./scripts/generate-swift-tokens.js)) generates properly typed Swift code with automatic unit conversions and organized extensions.
 
 ## Usage
 
@@ -111,11 +124,20 @@ import SwiftUI
 struct MyView: View {
     var body: some View {
         Text("Hello")
-            .foregroundColor(Color(hex: DesignSystem.colorPrimary500))
-            .padding(CGFloat(DesignSystem.spacing4))
+            .foregroundColor(Color(hex: Color.Brand.primary500))
+            .padding(CGFloat.Spacing.s4)
+            .font(.system(size: CGFloat.FontSize.base, weight: .init(Int.FontWeight.medium)))
     }
 }
 ```
+
+The custom generator provides:
+- ✅ Automatic unit conversion (rem→points, ms→seconds)
+- ✅ Proper Swift types (String, CGFloat, Int, TimeInterval)
+- ✅ Organized extensions for clean API
+- ✅ Hex color initializer included
+
+See [SWIFT_DESIGN_TOKENS_INTEGRATION.md](../../SWIFT_DESIGN_TOKENS_INTEGRATION.md) for complete Swift documentation.
 
 ## OKLCH Color Support
 
@@ -241,13 +263,26 @@ cd packages/design-tokens
 npm run build
 ```
 
-### Swift colors not working
+### Swift tokens not generating
 
-The built-in iOS format has limitations with OKLCH. For now:
-- Use hex colors (`colorPrimary500`) directly
-- Convert OKLCH colors to hex before using
+Ensure Node.js is installed (v16+):
 
-Future improvement: Custom Style Dictionary transformer for OKLCH → RGB conversion.
+```bash
+node --version
+npm run generate:tokens:ios
+```
+
+If the custom script fails, check:
+- JSON token files exist in `tokens/` directory
+- Output directory `dist/ios/` is writable
+
+### OKLCH colors in Swift
+
+Extended palette colors (santasgray, frenchrose, etc.) are OKLCH format strings. For now:
+- Primary/secondary/semantic colors use hex (work directly)
+- OKLCH colors need custom parsing or conversion
+
+Future enhancement: Add OKLCH → RGB converter library to custom script.
 
 ### CSS not updating in app
 
@@ -264,11 +299,12 @@ Future improvement: Custom Style Dictionary transformer for OKLCH → RGB conver
 ## Next Steps
 
 1. ✅ Basic Style Dictionary setup complete
-2. ⏳ Create Swift Package for iOS distribution
-3. ⏳ Add OKLCH → RGB transformer for Swift
-4. ⏳ Add Android platform support
-5. ⏳ Set up GitHub Action for auto-generation
-6. ⏳ Deprecate old TypeScript tokens
+2. ✅ Custom Swift token generator with proper types and conversions
+3. ⏳ Create Swift Package for iOS distribution
+4. ⏳ Add OKLCH → RGB transformer for Swift
+5. ⏳ Add Android platform support
+6. ⏳ Set up GitHub Action for auto-generation
+7. ⏳ Deprecate old TypeScript tokens
 
 ---
 

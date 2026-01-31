@@ -54,13 +54,13 @@ import SwiftUI
 struct MyView: View {
     var body: some View {
         Text("Hello")
-            .foregroundColor(Color(hex: DesignSystem.colorPrimary500))
-            .padding(DesignSystem.spacing4)
+            .foregroundColor(Color(hex: Color.Brand.primary500))
+            .padding(CGFloat.Spacing.s4)
     }
 }
 ```
 
-See [STYLE_DICTIONARY_GUIDE.md](./STYLE_DICTIONARY_GUIDE.md) for complete documentation.
+See [SWIFT_DESIGN_TOKENS_INTEGRATION.md](../../SWIFT_DESIGN_TOKENS_INTEGRATION.md) for complete Swift integration guide.
 
 ## Design Tokens
 
@@ -112,10 +112,10 @@ These JSON files are the **single source of truth**. Platform-specific outputs (
 # Build all platforms (web + iOS)
 npm run build
 
-# Build web only (CSS + JS)
+# Build web only (CSS + JS via Style Dictionary)
 npm run generate:tokens:web
 
-# Build iOS only (Swift)
+# Build iOS only (Swift via custom script)
 npm run generate:tokens:ios
 
 # Watch TypeScript changes
@@ -125,6 +125,8 @@ npm run dev
 npm run clean
 ```
 
+**Note:** Web tokens use Style Dictionary, iOS tokens use a custom Node.js script ([scripts/generate-swift-tokens.js](./scripts/generate-swift-tokens.js)) for proper type conversion and Swift syntax.
+
 ### Adding New Tokens
 
 1. Edit the appropriate JSON file in `tokens/`
@@ -133,12 +135,12 @@ npm run clean
 
 ### Platform Support
 
-- ✅ **Web**: CSS variables + TypeScript
-- ✅ **iOS**: Swift constants (basic)
+- ✅ **Web**: CSS variables + TypeScript (via Style Dictionary)
+- ✅ **iOS**: Swift constants with proper types (via custom generator)
 - ⏳ **Android**: Planned
 - ⏳ **React Native**: Planned
 
-See [STYLE_DICTIONARY_GUIDE.md](./STYLE_DICTIONARY_GUIDE.md) for detailed documentation.
+See [STYLE_DICTIONARY_GUIDE.md](./STYLE_DICTIONARY_GUIDE.md) for Style Dictionary details and [SWIFT_DESIGN_TOKENS_INTEGRATION.md](../../SWIFT_DESIGN_TOKENS_INTEGRATION.md) for Swift usage.
 
 ## Brand Philosophy
 
