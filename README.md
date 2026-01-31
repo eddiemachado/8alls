@@ -1,44 +1,64 @@
-# 8alls - Personal Productivity Suite
+# 8alls - Central Infrastructure for Personal Productivity Suite
 
-A monorepo containing a comprehensive suite of productivity tools with a unified design system and central API.
+A central connector monorepo providing shared infrastructure (design system, API client, MCP servers) that external application repositories consume.
 
 ## 🎱 Philosophy
 
-8alls is built around the concept of precision and interconnectedness - like the perfect 8-ball break. All applications share:
-- A central design system for consistent UX
-- A unified API for data synchronization
-- MCP servers for AI-powered automation
+8alls is built around the concept of precision and interconnectedness - like the perfect 8-ball break. This repository provides the **central connector** that all apps use:
+- A centralized design system for consistent UX across all platforms
+- A unified API client for data synchronization
+- MCP servers for AI-powered automation via Claude Code
+- A central API backend (coming soon) as single source of truth
 
-## 📁 Project Structure
+## 📁 Architecture
+
+### This Repository (8alls)
+
+Provides shared infrastructure consumed by external app repos:
 
 ```
 8alls/
 ├── packages/
-│   ├── design-tokens/     # Central design system (colors, typography, spacing, etc.)
+│   ├── design-tokens/     # Central design system (colors, typography, spacing)
 │   └── api-client/        # Shared API client for all apps
-├── apps/
-│   ├── task-web/          # Task management web app
-│   ├── calendar-web/      # Calendar app (coming soon)
-│   ├── health-mobile/     # Health tracker (coming soon)
-│   └── budget-web/        # Budget tool (coming soon)
-└── mcp-servers/
-    ├── mcp-tasks/         # MCP server for task management
-    ├── mcp-calendar/      # MCP server for calendar (coming soon)
-    └── mcp-health/        # MCP server for health tracking (coming soon)
+├── mcp-servers/
+│   ├── mcp-tasks/         # MCP server for task management
+│   └── mcp-calendar/      # MCP server for calendar (coming soon)
+└── api/                   # Central API backend (coming soon)
 ```
+
+### External Application Repositories
+
+Individual apps live in separate repos for better separation of concerns:
+
+```
+8alls-task-web/          → Next.js task management app
+8alls-calendar-web/      → Web calendar app
+8alls-calendar-desktop/  → Electron/Tauri desktop calendar
+8alls-health-mobile/     → React Native iOS/Android health app
+8alls-budget-web/        → Budget tracking web app
+8alls-music-web/         → Music player web app
+```
+
+**Benefits of separate repos:**
+- Independent deployment pipelines
+- Different tech stacks per platform (web/mobile/desktop)
+- Cleaner CI/CD per app
+- Better permission management
+- Easier team collaboration
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or pnpm
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/eddiemachado/8alls.git
 cd 8alls
 
 # Install all dependencies
@@ -48,15 +68,10 @@ npm install
 npm run build
 ```
 
-### Running Applications
+### Running MCP Servers
 
 ```bash
-# Run the task web app
-cd apps/task-web
-npm run dev
-# Opens on http://localhost:3000
-
-# Run an MCP server
+# Build and run the tasks MCP server
 cd mcp-servers/mcp-tasks
 npm run build
 npm start
@@ -69,36 +84,44 @@ npm start
 The central design system providing consistent styling across all applications.
 
 **Features:**
+- Pure CSS variables (NO Tailwind or frameworks)
 - Color palettes (primary, secondary, semantic colors)
-- Typography system (fonts, sizes, weights)
-- Spacing scale (4px base unit)
+- Typography system (Inter, Fira Code, Cal Sans)
+- Spacing scale (4px base unit, 0-96 range)
 - Animations and transitions
-- CSS variables for easy theming
 - Light and dark mode support
+- Framework-agnostic (React, Vue, vanilla JS)
 
-**Usage:**
+**Installation in External Apps:**
+
+```bash
+# Install via git dependency
+npm install github:eddiemachado/8alls#main
+```
+
+**Usage in External Apps:**
 
 ```typescript
+// In your app's layout.tsx or _app.tsx
+import '@8alls/design-tokens/styles/global.css';
+
+// Use CSS variables
+// styles.css
+.my-component {
+  background-color: var(--color-primary-500);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+// Or import tokens in TypeScript
 import { colors, spacing, typography } from '@8alls/design-tokens';
 
 const buttonStyle = {
   backgroundColor: colors.primary[500],
   padding: spacing[4],
   fontFamily: typography.fonts.sans,
-  borderRadius: '0.5rem',
 };
-```
-
-**CSS Variables:**
-
-```css
-@import '@8alls/design-tokens/styles/global.css';
-
-.my-component {
-  background-color: var(--color-primary-500);
-  padding: var(--spacing-4);
-  border-radius: var(--radius-md);
-}
 ```
 
 ### @8alls/api-client
@@ -111,14 +134,21 @@ Shared API client for communicating with the central 8alls API.
 - Support for tasks, calendar, health, and finance APIs
 - Universal search
 
-**Usage:**
+**Installation in External Apps:**
+
+```bash
+# Install via git dependency
+npm install github:eddiemachado/8alls#main
+```
+
+**Usage in External Apps:**
 
 ```typescript
 import { createApiClient } from '@8alls/api-client';
 
 const api = createApiClient({
-  baseURL: 'http://localhost:3000/api',
-  apiKey: 'your-api-key',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
 });
 
 // Fetch tasks
@@ -169,6 +199,16 @@ Task management server with the following tools:
 
 The 8alls design system is built on these principles:
 
+### No CSS Frameworks
+
+**Important:** This design system uses **pure CSS variables** - NO Tailwind, Bootstrap, or other frameworks.
+
+**Why?**
+- Full control over styling
+- Smaller bundle sizes
+- Framework-agnostic
+- Better for learning CSS fundamentals
+
 ### Color Palette
 
 **Primary (Indigo/Blue)**
@@ -210,10 +250,10 @@ The 8alls design system is built on these principles:
 
 ```
 ┌─────────────────────────────────────────────────┐
-│           Central API Server                     │
-│  (Your backend - FastAPI/NestJS/Go)             │
-│                                                  │
-│  Database: PostgreSQL                            │
+│         Central API Server (TO BUILD)            │
+│    FastAPI / NestJS / Go                         │
+│    Database: PostgreSQL                          │
+│    Location: This repo (api/)                    │
 └──────────────────┬──────────────────────────────┘
                    │
       ┌────────────┼────────────┬─────────────┐
@@ -221,43 +261,83 @@ The 8alls design system is built on these principles:
    [MCP]       [REST API]   [WebSockets]     │
       │            │            │             │
   Claude Code  Web Apps    Real-time      Mobile Apps
-  Claude AI    Next.js     Updates        React Native
+  Claude AI   (Separate    Updates       (Separate
+               repos)                      repos)
 ```
 
-### Design System Flow
+### Package Distribution
 
 ```
-@8alls/design-tokens
-       │
-       ├─→ Web Apps (import tokens directly)
-       ├─→ Mobile Apps (import tokens directly)
-       └─→ MCP Servers (for generated content)
+8alls/ (This Repo)
+├── @8alls/design-tokens  → Published to npm or git dependency
+├── @8alls/api-client     → Published to npm or git dependency
+├── mcp-servers/          → Run locally
+└── api/                  → Central backend (to build)
+
+External App Repos:
+├── 8alls-task-web/
+│   └── npm install github:eddiemachado/8alls#main
+├── 8alls-calendar-desktop/
+│   └── npm install github:eddiemachado/8alls#main
+└── 8alls-health-mobile/
+    └── npm install github:eddiemachado/8alls#main
 ```
 
 ## 🛠️ Development
 
-### Adding a New App
+### Creating a New External App
 
-1. Create app directory:
+**Template process:**
+
+1. **Create new repo**
+   ```bash
+   mkdir 8alls-myapp-web
+   cd 8alls-myapp-web
+   npx create-next-app@latest . --typescript --tailwind=false
+   ```
+
+2. **Install 8alls packages**
+   ```bash
+   npm install github:eddiemachado/8alls#main
+   ```
+
+3. **Import design tokens**
+   ```typescript
+   // In app/layout.tsx
+   import '@8alls/design-tokens/styles/global.css';
+   ```
+
+4. **Initialize API client**
+   ```typescript
+   // In lib/api.ts
+   import { createApiClient } from '@8alls/api-client';
+
+   export const api = createApiClient({
+     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL!,
+   });
+   ```
+
+5. **Start building!**
+
+### Local Development with Linked Packages
+
+During development, you can link packages locally:
+
 ```bash
-mkdir -p apps/my-new-app
+# In this repo (8alls)
+cd packages/design-tokens
+npm link
+
+cd ../api-client
+npm link
+
+# In your external app repo
+cd /path/to/8alls-task-web
+npm link @8alls/design-tokens
+npm link @8alls/api-client
 ```
 
-2. Create package.json with dependencies:
-```json
-{
-  "name": "@8alls/my-new-app",
-  "dependencies": {
-    "@8alls/design-tokens": "*",
-    "@8alls/api-client": "*"
-  }
-}
-```
-
-3. Import the global styles:
-```typescript
-import '@8alls/design-tokens/styles/global.css';
-```
+When you make changes to design tokens or API client, rebuild them and your external app will pick up the changes.
 
 ### Adding a New MCP Server
 
@@ -274,7 +354,8 @@ mkdir -p mcp-servers/mcp-my-feature
 
 1. Edit tokens in `packages/design-tokens/src/tokens/`
 2. Rebuild: `npm run build`
-3. Changes automatically propagate to all apps
+3. Push to GitHub
+4. In external apps: `npm update @8alls/design-tokens`
 
 ## 📝 Scripts
 
@@ -284,33 +365,84 @@ From the root directory:
 # Install all dependencies
 npm install
 
-# Build all packages and apps
+# Build all packages
 npm run build
-
-# Run development mode for all apps
-npm run dev
 
 # Clean all build artifacts
 npm run clean
-
-# Lint all code
-npm run lint
 ```
+
+From specific package:
+
+```bash
+cd packages/design-tokens
+npm run build      # Build package
+npm run dev        # Watch mode
+```
+
+MCP Server:
+
+```bash
+cd mcp-servers/mcp-tasks
+npm run build      # Compile TypeScript
+npm start          # Run server
+```
+
+## 🚢 Deployment Strategy
+
+**This Repo (8alls):**
+- **Packages**: Consumed via git dependencies or published to npm
+- **API**: Deploy to Railway, Fly.io, or DigitalOcean (when built)
+- **Database**: Supabase, PlanetScale, or self-hosted PostgreSQL
+- **MCP Servers**: Run locally (no deployment needed)
+
+**External App Repos:**
+- **Web Apps**: Vercel, Netlify, or Cloudflare Pages
+- **Desktop Apps**: GitHub Releases with auto-update
+- **Mobile Apps**: App Store, Play Store
 
 ## 🎯 Roadmap
 
+### Phase 1: Foundation ✅ COMPLETE
 - [x] Design system with tokens
 - [x] API client package
-- [x] Task management app
 - [x] MCP server for tasks
-- [ ] Central API server (FastAPI/NestJS)
-- [ ] Calendar app
-- [ ] Health tracker
-- [ ] Budget management app
-- [ ] Music player
-- [ ] Mobile apps (React Native)
-- [ ] Real-time synchronization
+- [x] Documentation
+- [x] Restructured for connector approach
+
+### Phase 2: Central API (CURRENT)
+- [ ] Build central API (FastAPI recommended)
+- [ ] Set up PostgreSQL database
+- [ ] Implement task endpoints
+- [ ] Implement calendar endpoints
+- [ ] Implement health endpoints
+- [ ] Deploy to production
+
+### Phase 3: External Apps
+- [ ] 8alls-task-web (Next.js)
+- [ ] 8alls-calendar-web (Next.js)
+- [ ] 8alls-calendar-desktop (Electron/Tauri)
+- [ ] 8alls-health-mobile (React Native)
+- [ ] 8alls-budget-web (Next.js)
+- [ ] 8alls-music-web (Next.js)
+
+### Phase 4: Integrations
+- [ ] Obsidian integration
+- [ ] Telegram bot
+- [ ] GitHub integration
+- [ ] Slack integration
+
+### Phase 5: Advanced Features
+- [ ] Real-time synchronization (WebSockets)
 - [ ] Offline support
+- [ ] Data export/import
+- [ ] Analytics dashboard
+
+## 📚 Documentation
+
+- [QUICKSTART.md](QUICKSTART.md) - Quick setup guide
+- [GITHUB_SETUP.md](GITHUB_SETUP.md) - GitHub deployment
+- [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) - Full project context and planning
 
 ## 🤝 Contributing
 
@@ -322,4 +454,4 @@ MIT
 
 ---
 
-Built with ❤️ using the 8alls design system
+Built with ❤️ using pure CSS (no frameworks!)

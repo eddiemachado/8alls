@@ -5,7 +5,6 @@
   "description": "8alls - Personal productivity suite",
   "workspaces": [
     "packages/*",
-    "apps/*",
     "mcp-servers/*"
   ],
   "scripts": {
