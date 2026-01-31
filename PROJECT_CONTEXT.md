@@ -34,10 +34,12 @@
    - TypeScript API client for central API
    - Type-safe methods for:
      - Tasks (list, get, create, update, delete)
-     - Calendar events
+     - Calendar events (list, get by date, create, update, delete)
      - Health logs
      - Transactions (budget)
      - Universal search
+   - WebSocket client with auto-reconnect for real-time updates
+   - Event listeners for task and calendar changes
    - Location: `/packages/api-client/`
    - **To use:** External apps install via npm or git dependency
 
@@ -48,8 +50,9 @@
    - Location: `/mcp-servers/mcp-tasks/`
 
 5. **FastAPI Backend** ✅ DEPLOYED
-   - Complete REST API with task endpoints
+   - Complete REST API with task and calendar endpoints
    - SQLAlchemy ORM with Pydantic schemas
+   - WebSocket support for real-time updates
    - CORS middleware for external apps
    - Auto-generated API docs (Swagger UI)
    - Health check endpoint
@@ -72,19 +75,31 @@
    - **Live at:** https://8alls.com
    - Location: `/index.html`
 
-8. **Documentation**
+8. **Calendar API** ✅ DEPLOYED
+   - Complete calendar/events CRUD endpoints
+   - Date range filtering and date-based queries
+   - Support for recurrence rules (RRULE format)
+   - Event status tracking (confirmed, tentative, cancelled)
+   - Attendees, reminders, and color coding
+   - WebSocket broadcasting for real-time sync
+   - Comprehensive Swift integration guide
+   - Location: `/api/app/routes/events.py`
+   - **Live at:** https://8alls-api.fly.dev/api/events
+
+9. **Documentation**
    - README.md - Full project documentation
    - QUICKSTART.md - Step-by-step getting started (this repo)
    - EXTERNAL_APP_SETUP.md - Complete guide for building external apps
    - GITHUB_SETUP.md - GitHub deployment guide
+   - SWIFT_CALENDAR_INTEGRATION.md - Complete Swift/iOS integration guide
    - api/README.md - API documentation
    - api/DEPLOYMENT.md - Fly.io + Supabase deployment guide
 
-9. **GitHub Pages** ✅ DEPLOYED
-   - .gitignore configured (root + api/)
-   - All code committed and pushed
-   - GitHub Pages enabled on main branch
-   - **Live at:** https://8alls.com
+10. **GitHub Pages** ✅ DEPLOYED
+    - .gitignore configured (root + api/)
+    - All code committed and pushed
+    - GitHub Pages enabled on main branch
+    - **Live at:** https://8alls.com
 
 ## Architecture Philosophy
 
@@ -225,12 +240,16 @@ External App Repos (TO BUILD):
 │   │   │   ├── config.py            # App configuration
 │   │   │   └── database.py          # Database connection
 │   │   ├── models/
-│   │   │   └── task.py              # SQLAlchemy task model
+│   │   │   ├── task.py              # SQLAlchemy task model
+│   │   │   └── event.py             # SQLAlchemy event model
 │   │   ├── routes/
 │   │   │   ├── tasks.py             # Task CRUD endpoints
+│   │   │   ├── events.py            # Calendar event CRUD endpoints
+│   │   │   ├── websocket.py         # WebSocket for real-time updates
 │   │   │   └── search.py            # Search endpoint
 │   │   ├── schemas/
-│   │   │   └── task.py              # Pydantic schemas
+│   │   │   ├── task.py              # Pydantic task schemas
+│   │   │   └── event.py             # Pydantic event schemas
 │   │   └── main.py                  # FastAPI application
 │   ├── venv/                        # Python virtual environment
 │   ├── requirements.txt             # Python dependencies
@@ -290,6 +309,8 @@ External App Repos (TO BUILD):
 ### Phase 2: Central API ✅ COMPLETE
 - [x] Choose backend framework (FastAPI selected)
 - [x] Build FastAPI backend with task endpoints
+- [x] Build calendar/events API with full CRUD
+- [x] Implement WebSocket support for real-time updates
 - [x] Create database models (SQLAlchemy)
 - [x] Implement CRUD operations
 - [x] Add search endpoint
@@ -298,6 +319,8 @@ External App Repos (TO BUILD):
 - [x] Deploy to Fly.io (https://8alls-api.fly.dev)
 - [x] Set up Supabase PostgreSQL database
 - [x] Write deployment documentation
+- [x] Update API client with calendar methods and WebSocket
+- [x] Create Swift integration guide for iOS calendar app
 
 ### Phase 3: Build First External App (CURRENT PRIORITY)
 **Goal:** Validate the entire architecture works end-to-end
@@ -326,32 +349,38 @@ External App Repos (TO BUILD):
 
 ### Phase 4: MCP Server Integration (NEXT)
 
-**API Requirements:**
+**API Endpoints:**
 ```
-Endpoints needed:
-- Tasks API
+✅ Tasks API (DEPLOYED)
   GET    /api/tasks
   POST   /api/tasks
   GET    /api/tasks/:id
   PUT    /api/tasks/:id
   DELETE /api/tasks/:id
 
-- Calendar API
-  GET    /api/events
-  POST   /api/events
-  GET    /api/events/:id
-  PUT    /api/events/:id
-  DELETE /api/events/:id
+✅ Calendar API (DEPLOYED)
+  GET    /api/events                    # List all events with filters
+  GET    /api/events?start_date=...     # Filter by date range
+  GET    /api/events?event_type=...     # Filter by type
+  GET    /api/events?status=...         # Filter by status
+  GET    /api/events/date/:date         # Get events for specific date
+  GET    /api/events/:id                # Get single event
+  POST   /api/events                    # Create event
+  PUT    /api/events/:id                # Update event
+  DELETE /api/events/:id                # Delete event
 
-- Health API
+✅ WebSocket (DEPLOYED)
+  WS     /ws                            # Real-time updates
+
+⏳ Health API
   GET    /api/health
   POST   /api/health
 
-- Finance API
+⏳ Finance API
   GET    /api/transactions
   POST   /api/transactions
 
-- Search
+✅ Search (DEPLOYED)
   GET    /api/search?q=query
 ```
 
@@ -513,12 +542,48 @@ const api = createApiClient({
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
 });
 
-// Use the client
+// Use the client - Tasks
 const tasks = await api.getTasks();
 const newTask = await api.createTask({
   title: 'Build feature',
   priority: 'high',
   completed: false,
+});
+
+// Use the client - Calendar events
+const events = await api.getEvents({
+  start_date: '2026-02-01T00:00:00Z',
+  end_date: '2026-02-28T23:59:59Z',
+});
+
+const dayEvents = await api.getEventsByDate('2026-02-01');
+
+const newEvent = await api.createEvent({
+  title: 'Team Meeting',
+  start_time: '2026-02-01T10:00:00Z',
+  end_time: '2026-02-01T11:00:00Z',
+  all_day: false,
+  status: 'confirmed',
+  event_type: 'meeting',
+});
+
+// Enable real-time updates with WebSocket
+api.enableRealtime();
+
+// Listen for calendar events
+api.onEventCreated((event) => {
+  console.log('New event:', event);
+  // Update UI
+});
+
+api.onEventUpdated((event) => {
+  console.log('Event updated:', event);
+  // Update UI
+});
+
+api.onEventDeleted((eventId) => {
+  console.log('Event deleted:', eventId);
+  // Update UI
 });
 ```
 
@@ -728,7 +793,7 @@ The [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) guide includes:
 
 **Cost:** $0/month (all free tiers)
 
-## Current Status (As of Session 3)
+## Current Status (As of Session 4)
 
 ### ✅ What's Working
 
@@ -736,12 +801,15 @@ The [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) guide includes:
 - ✅ Landing page live at https://8alls.com (GitHub Pages)
 - ✅ API live at https://8alls-api.fly.dev (Fly.io)
 - ✅ Database running on Supabase (PostgreSQL)
-- ✅ Design tokens ready to consume
-- ✅ API client ready to consume
+- ✅ Design tokens with 13 OKLCH color palettes ready to consume
+- ✅ API client with calendar and WebSocket support ready to consume
 - ✅ MCP server built (needs production URL update)
 
 **You can:**
 - ✅ Create, list, search tasks via API
+- ✅ Create, list, filter calendar events via API
+- ✅ Query events by date range or specific date
+- ✅ Receive real-time updates via WebSocket
 - ✅ View API docs at https://8alls-api.fly.dev/docs
 - ✅ Manage database via Supabase dashboard
 - ✅ Deploy API updates with `fly deploy`
@@ -795,10 +863,15 @@ When you continue:
 
 ---
 
-**Last Updated:** January 31, 2026 - Session 3
+**Last Updated:** January 31, 2026 - Session 4
 **Current Directory:** /Users/eddiemachado/Documents/Personal/8alls
 **Landing Page:** https://8alls.com (GitHub Pages)
 **Production API:** https://8alls-api.fly.dev (Fly.io)
 **Database:** Supabase PostgreSQL
-**Status:** Full infrastructure deployed and operational, ready to build first external app
+**Status:** Full infrastructure deployed with calendar API and WebSocket support, ready to build external apps
 **Cost:** $0/month (GitHub Pages + Fly.io + Supabase free tiers)
+**New in Session 4:**
+- ✅ Calendar API with full CRUD operations
+- ✅ WebSocket support for real-time updates
+- ✅ 13 OKLCH color palettes added to design tokens
+- ✅ Swift integration guide for iOS calendar app
