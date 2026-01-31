@@ -65,23 +65,26 @@
    - HTTPS enabled automatically
    - **Total cost:** $0/month
 
-7. **Landing Page**
-   - Simple index.html with 8 ball emoji
+7. **Landing Page** ✅ LIVE
+   - Simple index.html with 8-ball emoji (🎱)
    - Prevents code exposure on GitHub Pages
-   - Ready for future expansion
+   - Deployed via GitHub Pages
+   - **Live at:** https://8alls.com
    - Location: `/index.html`
 
 8. **Documentation**
    - README.md - Full project documentation
-   - QUICKSTART.md - Step-by-step getting started
+   - QUICKSTART.md - Step-by-step getting started (this repo)
+   - EXTERNAL_APP_SETUP.md - Complete guide for building external apps
    - GITHUB_SETUP.md - GitHub deployment guide
    - api/README.md - API documentation
    - api/DEPLOYMENT.md - Fly.io + Supabase deployment guide
 
-9. **GitHub Ready**
+9. **GitHub Pages** ✅ DEPLOYED
    - .gitignore configured (root + api/)
-   - All code committed
-   - Ready to push to repository
+   - All code committed and pushed
+   - GitHub Pages enabled on main branch
+   - **Live at:** https://8alls.com
 
 ## Architecture Philosophy
 
@@ -152,6 +155,12 @@ Production Infrastructure:
                       │                            │            │
                Claude Code/AI              External Apps    Real-time
                 (Local/Cloud)              (Separate repos)   Updates
+
+┌─────────────────────────────────────────────────────────────────┐
+│   GitHub Pages (FREE)                                           │
+│   Landing Page: https://8alls.com                               │
+│   Serves: index.html (8-ball emoji)                             │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ```
@@ -276,6 +285,7 @@ External App Repos (TO BUILD):
 - [x] Documentation (README, QUICKSTART, GITHUB_SETUP)
 - [x] Restructure for connector approach (apps in separate repos)
 - [x] Landing page (index.html)
+- [x] Deploy to GitHub Pages (https://8alls.com)
 
 ### Phase 2: Central API ✅ COMPLETE
 - [x] Choose backend framework (FastAPI selected)
@@ -561,9 +571,10 @@ PORT=3000
 ## Deployment Strategy
 
 **This Repo (8alls):**
+- **Landing Page**: ✅ GitHub Pages (https://8alls.com)
+- **API**: ✅ Fly.io (https://8alls-api.fly.dev)
+- **Database**: ✅ Supabase PostgreSQL (free tier)
 - **Packages**: Auto-published to npm or consumed via git
-- **API**: Deploy to Railway, Fly.io, or DigitalOcean
-- **Database**: Supabase, PlanetScale, or self-hosted PostgreSQL
 - **MCP Servers**: Run locally (no deployment needed)
 
 **External App Repos:**
@@ -631,7 +642,9 @@ npm link @8alls/api-client
 
 ## Creating a New External App
 
-**Template process:**
+**📖 Complete Guide:** See [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) for detailed instructions, troubleshooting, and examples.
+
+**Quick Template:**
 
 1. **Create new repo**
    ```bash
@@ -645,13 +658,19 @@ npm link @8alls/api-client
    npm install github:eddiemachado/8alls#main
    ```
 
-3. **Import design tokens**
+3. **Set environment variables**
+   ```bash
+   # .env.local
+   NEXT_PUBLIC_API_BASE_URL=https://8alls-api.fly.dev/api
+   ```
+
+4. **Import design tokens**
    ```typescript
    // In app/layout.tsx
    import '@8alls/design-tokens/styles/global.css';
    ```
 
-4. **Initialize API client**
+5. **Initialize API client**
    ```typescript
    // In lib/api.ts
    import { createApiClient } from '@8alls/api-client';
@@ -661,7 +680,15 @@ npm link @8alls/api-client
    });
    ```
 
-5. **Start building!**
+6. **Start building!**
+
+The [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) guide includes:
+- Framework-specific setup (Next.js, Vite, React)
+- Complete API client usage examples
+- All available design tokens
+- Testing procedures
+- Deployment instructions
+- Troubleshooting common issues
 
 ## Conversation Summary
 
@@ -684,22 +711,34 @@ npm link @8alls/api-client
 **Current Status:**
 - ✅ Foundation complete
 - ✅ Restructured for connector approach
-- ✅ Central API built and deployed
+- ✅ Landing page deployed (https://8alls.com)
+- ✅ Central API built and deployed (https://8alls-api.fly.dev)
 - ✅ Production infrastructure operational ($0/month)
 - 🔜 Ready to create first external app
 - 🔜 Ready to update MCP server
+
+## Production URLs
+
+**Live Services:**
+- 🌐 Landing Page: https://8alls.com
+- 🚀 API Backend: https://8alls-api.fly.dev
+- 📚 API Docs: https://8alls-api.fly.dev/docs
+- 💚 Health Check: https://8alls-api.fly.dev/health
+- 🗄️ Database: Supabase PostgreSQL (private)
+
+**Cost:** $0/month (all free tiers)
 
 ## Current Status (As of Session 3)
 
 ### ✅ What's Working
 
 **Infrastructure:**
-- ✅ API is live at https://8alls-api.fly.dev
-- ✅ Database is running on Supabase (PostgreSQL)
+- ✅ Landing page live at https://8alls.com (GitHub Pages)
+- ✅ API live at https://8alls-api.fly.dev (Fly.io)
+- ✅ Database running on Supabase (PostgreSQL)
 - ✅ Design tokens ready to consume
 - ✅ API client ready to consume
 - ✅ MCP server built (needs production URL update)
-- ✅ Landing page at 8alls.com (when GitHub Pages enabled)
 
 **You can:**
 - ✅ Create, list, search tasks via API
@@ -712,10 +751,9 @@ npm link @8alls/api-client
 ### 🔜 What's Next
 
 **Immediate next task:**
-1. Push code to GitHub
-2. Create first external app (8alls-task-web)
-3. Update MCP server to production URL
-4. Test full stack end-to-end
+1. Create first external app (8alls-task-web)
+2. Update MCP server to production URL
+3. Test full stack end-to-end
 
 ## Next Session Goals
 
@@ -746,18 +784,21 @@ When you continue:
 - Health tracker
 - Budget tool
 
-## Questions to Answer Next Session
+## Questions Answered
 
-1. Which backend framework? (FastAPI, NestJS, or Go)
-2. Database choice? (PostgreSQL or SQLite initially)
-3. Which app to build first?
-4. Publish to npm or use git dependencies?
-5. Any design system customizations needed?
+1. ✅ Which backend framework? → **FastAPI** (Python)
+2. ✅ Database choice? → **PostgreSQL** (Supabase)
+3. ✅ Hosting? → **Fly.io** (API) + **GitHub Pages** (landing)
+4. ⏳ Which app to build first? → **8alls-task-web** (Next task)
+5. ⏳ Publish to npm or use git dependencies? → TBD when building first app
+6. ⏳ Any design system customizations needed? → TBD during first app
 
 ---
 
 **Last Updated:** January 31, 2026 - Session 3
 **Current Directory:** /Users/eddiemachado/Documents/Personal/8alls
-**Production API:** https://8alls-api.fly.dev
-**Status:** API deployed and operational, ready to build first external app
-**Cost:** $0/month (Fly.io + Supabase free tiers)
+**Landing Page:** https://8alls.com (GitHub Pages)
+**Production API:** https://8alls-api.fly.dev (Fly.io)
+**Database:** Supabase PostgreSQL
+**Status:** Full infrastructure deployed and operational, ready to build first external app
+**Cost:** $0/month (GitHub Pages + Fly.io + Supabase free tiers)

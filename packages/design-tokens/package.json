@@ -5,7 +5,8 @@
   "types": "./dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run generate:css",
+    "generate:css": "node scripts/generate-css.js",
     "dev": "tsc --watch",
     "clean": "rm -rf dist"
   },
