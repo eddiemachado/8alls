@@ -2,6 +2,8 @@
 
 A central connector monorepo providing shared infrastructure (design system, API client, MCP servers) that external application repositories consume.
 
+> **📘 Building a new app?** See [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) for the complete setup guide.
+
 ## 🎱 Philosophy
 
 8alls is built around the concept of precision and interconnectedness - like the perfect 8-ball break. This repository provides the **central connector** that all apps use:
@@ -147,8 +149,7 @@ npm install github:eddiemachado/8alls#main
 import { createApiClient } from '@8alls/api-client';
 
 const api = createApiClient({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL, // https://8alls-api.fly.dev/api
 });
 
 // Fetch tasks
@@ -187,13 +188,14 @@ Task management server with the following tools:
       "command": "node",
       "args": ["/path/to/8alls/mcp-servers/mcp-tasks/dist/index.js"],
       "env": {
-        "API_BASE_URL": "http://localhost:3000/api",
-        "API_KEY": "your-api-key"
+        "API_BASE_URL": "https://8alls-api.fly.dev/api"
       }
     }
   }
 }
 ```
+
+Note: Update the MCP server code to use the production URL before configuring Claude Desktop.
 
 ## 🎨 Design System
 
@@ -250,10 +252,10 @@ The 8alls design system is built on these principles:
 
 ```
 ┌─────────────────────────────────────────────────┐
-│         Central API Server (TO BUILD)            │
-│    FastAPI / NestJS / Go                         │
-│    Database: PostgreSQL                          │
-│    Location: This repo (api/)                    │
+│    Central API Server ✅ DEPLOYED                │
+│    FastAPI (Python)                              │
+│    https://8alls-api.fly.dev                     │
+│    Database: Supabase PostgreSQL                 │
 └──────────────────┬──────────────────────────────┘
                    │
       ┌────────────┼────────────┬─────────────┐
@@ -262,7 +264,13 @@ The 8alls design system is built on these principles:
       │            │            │             │
   Claude Code  Web Apps    Real-time      Mobile Apps
   Claude AI   (Separate    Updates       (Separate
-               repos)                      repos)
+               repos)      (Future)        repos)
+
+┌─────────────────────────────────────────────────┐
+│    Landing Page ✅ DEPLOYED                      │
+│    https://8alls.com                             │
+│    GitHub Pages                                  │
+└─────────────────────────────────────────────────┘
 ```
 
 ### Package Distribution
@@ -287,7 +295,9 @@ External App Repos:
 
 ### Creating a New External App
 
-**Template process:**
+**📖 See [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) for the complete guide.**
+
+**Quick template:**
 
 1. **Create new repo**
    ```bash
@@ -301,13 +311,19 @@ External App Repos:
    npm install github:eddiemachado/8alls#main
    ```
 
-3. **Import design tokens**
+3. **Set environment variables**
+   ```bash
+   # .env.local
+   NEXT_PUBLIC_API_BASE_URL=https://8alls-api.fly.dev/api
+   ```
+
+4. **Import design tokens**
    ```typescript
    // In app/layout.tsx
    import '@8alls/design-tokens/styles/global.css';
    ```
 
-4. **Initialize API client**
+5. **Initialize API client**
    ```typescript
    // In lib/api.ts
    import { createApiClient } from '@8alls/api-client';
@@ -317,7 +333,9 @@ External App Repos:
    });
    ```
 
-5. **Start building!**
+6. **Start building!**
+
+For detailed instructions, troubleshooting, and examples, see [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md).
 
 ### Local Development with Linked Packages
 
@@ -391,15 +409,24 @@ npm start          # Run server
 ## 🚢 Deployment Strategy
 
 **This Repo (8alls):**
+- **Landing Page**: ✅ GitHub Pages (https://8alls.com)
+- **API**: ✅ Fly.io (https://8alls-api.fly.dev)
+- **Database**: ✅ Supabase PostgreSQL (free tier)
 - **Packages**: Consumed via git dependencies or published to npm
-- **API**: Deploy to Railway, Fly.io, or DigitalOcean (when built)
-- **Database**: Supabase, PlanetScale, or self-hosted PostgreSQL
 - **MCP Servers**: Run locally (no deployment needed)
 
 **External App Repos:**
 - **Web Apps**: Vercel, Netlify, or Cloudflare Pages
 - **Desktop Apps**: GitHub Releases with auto-update
 - **Mobile Apps**: App Store, Play Store
+
+## 🌐 Production URLs
+
+- **Landing Page:** https://8alls.com (GitHub Pages)
+- **API Backend:** https://8alls-api.fly.dev (Fly.io)
+- **API Docs:** https://8alls-api.fly.dev/docs
+- **Health Check:** https://8alls-api.fly.dev/health
+- **Cost:** $0/month (all free tiers)
 
 ## 🎯 Roadmap
 
@@ -409,16 +436,20 @@ npm start          # Run server
 - [x] MCP server for tasks
 - [x] Documentation
 - [x] Restructured for connector approach
+- [x] Landing page deployed to GitHub Pages
 
-### Phase 2: Central API (CURRENT)
-- [ ] Build central API (FastAPI recommended)
-- [ ] Set up PostgreSQL database
-- [ ] Implement task endpoints
+### Phase 2: Central API ✅ COMPLETE
+- [x] Build central API (FastAPI)
+- [x] Set up PostgreSQL database (Supabase)
+- [x] Implement task endpoints
+- [x] Implement search endpoint
+- [x] Deploy to production (Fly.io)
+- [x] API documentation (Swagger UI)
 - [ ] Implement calendar endpoints
 - [ ] Implement health endpoints
-- [ ] Deploy to production
+- [ ] Implement budget endpoints
 
-### Phase 3: External Apps
+### Phase 3: External Apps (CURRENT)
 - [ ] 8alls-task-web (Next.js)
 - [ ] 8alls-calendar-web (Next.js)
 - [ ] 8alls-calendar-desktop (Electron/Tauri)
@@ -440,9 +471,12 @@ npm start          # Run server
 
 ## 📚 Documentation
 
-- [QUICKSTART.md](QUICKSTART.md) - Quick setup guide
+- [QUICKSTART.md](QUICKSTART.md) - Quick setup guide for this repo
+- [EXTERNAL_APP_SETUP.md](EXTERNAL_APP_SETUP.md) - **Guide for building external apps** (START HERE for new apps)
 - [GITHUB_SETUP.md](GITHUB_SETUP.md) - GitHub deployment
 - [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) - Full project context and planning
+- [api/README.md](api/README.md) - API documentation
+- [api/DEPLOYMENT.md](api/DEPLOYMENT.md) - API deployment guide
 
 ## 🤝 Contributing
 
