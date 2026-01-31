@@ -5,7 +5,7 @@ import logging
 
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.routes import tasks, search
+from app.routes import tasks, search, events, websocket
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +39,8 @@ app.add_middleware(
 # Include routers
 app.include_router(tasks.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
+app.include_router(events.router, prefix="/api")
+app.include_router(websocket.router)
 
 
 @app.get("/")

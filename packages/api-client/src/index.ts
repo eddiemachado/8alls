@@ -7,6 +7,17 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
+// WebSocket event types
+export type WebSocketEventType = 'task_created' | 'task_updated' | 'task_deleted' | 'event_created' | 'event_updated' | 'event_deleted';
+
+export interface WebSocketMessage {
+  type: WebSocketEventType;
+  data: any;
+  timestamp: string;
+}
+
+export type WebSocketCallback = (message: WebSocketMessage) => void;
+
 export interface ApiClientConfig {
   baseURL: string;
   apiKey?: string;
@@ -29,12 +40,26 @@ export interface CalendarEvent {
   id: string;
   title: string;
   description?: string;
-  startDate: string;
-  endDate: string;
-  allDay: boolean;
+  start_time: string;
+  end_time: string;
+  all_day: boolean;
   location?: string;
-  createdAt: string;
-  updatedAt: string;
+  recurrence_rule?: string;
+  status: 'confirmed' | 'tentative' | 'cancelled';
+  event_type?: string;
+  color?: string;
+  tags?: string[];
+  attendees?: Array<{ name: string; email: string }>;
+  reminders?: Array<{ minutes_before: number; method: string }>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EventFilters {
+  start_date?: string;
+  end_date?: string;
+  event_type?: string;
+  status?: 'confirmed' | 'tentative' | 'cancelled';
 }
 
 export interface HealthLog {
@@ -57,8 +82,100 @@ export interface Transaction {
   createdAt: string;
 }
 
+export class WebSocketClient {
+  private ws: WebSocket | null = null;
+  private callbacks: Map<WebSocketEventType, Set<WebSocketCallback>> = new Map();
+  private url: string;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectDelay = 1000;
+
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  connect(): void {
+    try {
+      this.ws = new WebSocket(this.url);
+
+      this.ws.onopen = () => {
+        console.log('WebSocket connected');
+        this.reconnectAttempts = 0;
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const message: WebSocketMessage = JSON.parse(event.data);
+          this.handleMessage(message);
+        } catch (error) {
+          console.error('Failed to parse WebSocket message:', error);
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      this.ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        this.attemptReconnect();
+      };
+    } catch (error) {
+      console.error('Failed to connect WebSocket:', error);
+    }
+  }
+
+  private attemptReconnect(): void {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+      console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+
+      setTimeout(() => {
+        this.connect();
+      }, delay);
+    } else {
+      console.error('Max reconnection attempts reached');
+    }
+  }
+
+  private handleMessage(message: WebSocketMessage): void {
+    const callbacks = this.callbacks.get(message.type);
+    if (callbacks) {
+      callbacks.forEach(callback => callback(message));
+    }
+  }
+
+  on(eventType: WebSocketEventType, callback: WebSocketCallback): () => void {
+    if (!this.callbacks.has(eventType)) {
+      this.callbacks.set(eventType, new Set());
+    }
+    this.callbacks.get(eventType)!.add(callback);
+
+    // Return unsubscribe function
+    return () => {
+      const callbacks = this.callbacks.get(eventType);
+      if (callbacks) {
+        callbacks.delete(callback);
+      }
+    };
+  }
+
+  disconnect(): void {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  isConnected(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
+}
+
 export class ApiClient {
   private client: AxiosInstance;
+  private wsClient?: WebSocketClient;
 
   constructor(config: ApiClientConfig) {
     this.client = axios.create({
@@ -123,15 +240,26 @@ export class ApiClient {
   }
 
   // Calendar API
-  async getEvents(): Promise<CalendarEvent[]> {
-    return this.get<CalendarEvent[]>('/events');
+  async getEvents(filters?: EventFilters): Promise<CalendarEvent[]> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.event_type) params.append('event_type', filters.event_type);
+    if (filters?.status) params.append('status', filters.status);
+
+    const queryString = params.toString();
+    return this.get<CalendarEvent[]>(`/events${queryString ? `?${queryString}` : ''}`);
   }
 
   async getEvent(id: string): Promise<CalendarEvent> {
     return this.get<CalendarEvent>(`/events/${id}`);
   }
 
-  async createEvent(event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>): Promise<CalendarEvent> {
+  async getEventsByDate(date: string): Promise<CalendarEvent[]> {
+    return this.get<CalendarEvent[]>(`/events/date/${date}`);
+  }
+
+  async createEvent(event: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'>): Promise<CalendarEvent> {
     return this.post<CalendarEvent>('/events', event);
   }
 
@@ -164,6 +292,65 @@ export class ApiClient {
   // Universal search
   async search(query: string): Promise<any> {
     return this.get<any>(`/search?q=${encodeURIComponent(query)}`);
+  }
+
+  // WebSocket methods
+  enableRealtime(wsUrl?: string): WebSocketClient {
+    if (!this.wsClient) {
+      const url = wsUrl || this.client.defaults.baseURL?.replace('http', 'ws') + '/ws';
+      this.wsClient = new WebSocketClient(url);
+      this.wsClient.connect();
+    }
+    return this.wsClient;
+  }
+
+  disableRealtime(): void {
+    if (this.wsClient) {
+      this.wsClient.disconnect();
+      this.wsClient = undefined;
+    }
+  }
+
+  onTaskCreated(callback: (task: Task) => void): () => void {
+    if (!this.wsClient) {
+      throw new Error('Realtime not enabled. Call enableRealtime() first.');
+    }
+    return this.wsClient.on('task_created', (message) => callback(message.data));
+  }
+
+  onTaskUpdated(callback: (task: Task) => void): () => void {
+    if (!this.wsClient) {
+      throw new Error('Realtime not enabled. Call enableRealtime() first.');
+    }
+    return this.wsClient.on('task_updated', (message) => callback(message.data));
+  }
+
+  onTaskDeleted(callback: (taskId: string) => void): () => void {
+    if (!this.wsClient) {
+      throw new Error('Realtime not enabled. Call enableRealtime() first.');
+    }
+    return this.wsClient.on('task_deleted', (message) => callback(message.data.id));
+  }
+
+  onEventCreated(callback: (event: CalendarEvent) => void): () => void {
+    if (!this.wsClient) {
+      throw new Error('Realtime not enabled. Call enableRealtime() first.');
+    }
+    return this.wsClient.on('event_created', (message) => callback(message.data));
+  }
+
+  onEventUpdated(callback: (event: CalendarEvent) => void): () => void {
+    if (!this.wsClient) {
+      throw new Error('Realtime not enabled. Call enableRealtime() first.');
+    }
+    return this.wsClient.on('event_updated', (message) => callback(message.data));
+  }
+
+  onEventDeleted(callback: (eventId: string) => void): () => void {
+    if (!this.wsClient) {
+      throw new Error('Realtime not enabled. Call enableRealtime() first.');
+    }
+    return this.wsClient.on('event_deleted', (message) => callback(message.data.id));
   }
 }
 
