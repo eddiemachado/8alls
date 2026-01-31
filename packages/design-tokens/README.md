@@ -2,6 +2,8 @@
 
 The central design system for the 8alls productivity suite. This package provides design tokens (colors, typography, spacing, animations) that ensure consistency across all 8alls applications.
 
+**🎨 Now powered by Style Dictionary** - Generate platform-specific tokens from a single JSON source for web, iOS, Android, and more.
+
 ## Installation
 
 ```bash
@@ -13,51 +15,52 @@ npm install
 
 ## Usage
 
-### TypeScript/JavaScript
+### Web (CSS Variables) - **Recommended**
+
+Import the pre-generated CSS variables:
 
 ```typescript
-import { colors, typography, spacing, tokens } from '@8alls/design-tokens';
-
-// Use individual tokens
-const buttonStyle = {
-  backgroundColor: colors.primary[500],
-  padding: spacing[4],
-  fontFamily: typography.fonts.sans,
-  borderRadius: '0.5rem',
-};
-
-// Or use the tokens namespace
-const cardStyle = {
-  backgroundColor: tokens.colors.light.background.primary,
-  boxShadow: tokens.shadows.md,
-};
+// In your app layout or entry point
+import '@8alls/design-tokens/dist/web/variables.css';
 ```
 
-### CSS Variables
+Use in your CSS/SCSS:
 
-Generate CSS custom properties from tokens:
+```css
+.button {
+  background-color: var(--color-primary-500);
+  padding: var(--spacing-4);
+  font-family: var(--font-family-sans);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+```
+
+### Web (JavaScript/TypeScript)
 
 ```typescript
-import { colors, spacing } from '@8alls/design-tokens';
+import tokens from '@8alls/design-tokens/dist/web/tokens';
 
-// Generate CSS variables
-const cssVars = `
-  :root {
-    --color-primary: ${colors.primary[500]};
-    --spacing-md: ${spacing[4]};
-  }
-`;
-
-// Or use inline styles directly
-<button style={{
-  backgroundColor: colors.primary[500],
-  color: '#fff',
-  padding: spacing[4],
-  borderRadius: '0.5rem',
-}}>
-  Click me
-</button>
+// Access token values
+const primaryColor = tokens.color.primary['500'].value; // "#6366f1"
+const baseSpacing = tokens.spacing['4'].value; // "1rem"
 ```
+
+### iOS (Swift)
+
+```swift
+import SwiftUI
+
+struct MyView: View {
+    var body: some View {
+        Text("Hello")
+            .foregroundColor(Color(hex: DesignSystem.colorPrimary500))
+            .padding(DesignSystem.spacing4)
+    }
+}
+```
+
+See [STYLE_DICTIONARY_GUIDE.md](./STYLE_DICTIONARY_GUIDE.md) for complete documentation.
 
 ## Design Tokens
 
@@ -89,18 +92,53 @@ const cssVars = `
 - `transition` - Common transition presets
 - `keyframes` - Animation keyframes
 
+## Token Source
+
+Design tokens are defined in JSON format in the `tokens/` directory:
+
+```
+tokens/
+├── colors.json      # Color palettes (hex + OKLCH)
+├── spacing.json     # Spacing, radius, shadows, z-index
+├── typography.json  # Fonts, sizes, weights
+└── animation.json   # Durations, easing functions
+```
+
+These JSON files are the **single source of truth**. Platform-specific outputs (CSS, TypeScript, Swift) are auto-generated using [Style Dictionary](https://amzn.github.io/style-dictionary/).
+
 ## Development
 
 ```bash
-# Build the package
+# Build all platforms (web + iOS)
 npm run build
 
-# Watch for changes
+# Build web only (CSS + JS)
+npm run generate:tokens:web
+
+# Build iOS only (Swift)
+npm run generate:tokens:ios
+
+# Watch TypeScript changes
 npm run dev
 
 # Clean build artifacts
 npm run clean
 ```
+
+### Adding New Tokens
+
+1. Edit the appropriate JSON file in `tokens/`
+2. Run `npm run build`
+3. Generated platform files update automatically
+
+### Platform Support
+
+- ✅ **Web**: CSS variables + TypeScript
+- ✅ **iOS**: Swift constants (basic)
+- ⏳ **Android**: Planned
+- ⏳ **React Native**: Planned
+
+See [STYLE_DICTIONARY_GUIDE.md](./STYLE_DICTIONARY_GUIDE.md) for detailed documentation.
 
 ## Brand Philosophy
 
