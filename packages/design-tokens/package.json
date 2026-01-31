@@ -8,9 +8,9 @@
   ],
   "scripts": {
     "build": "npm run generate:tokens && tsc",
-    "generate:tokens": "style-dictionary build --config style-dictionary.config.js",
-    "generate:tokens:web": "style-dictionary build --config style-dictionary.config.js --platform css,js",
-    "generate:tokens:ios": "style-dictionary build --config style-dictionary.config.js --platform ios",
+    "generate:tokens": "npm run generate:tokens:web && npm run generate:tokens:ios",
+    "generate:tokens:web": "style-dictionary build --config style-dictionary.config.js",
+    "generate:tokens:ios": "node scripts/generate-swift-tokens.js",
     "dev": "tsc --watch",
     "clean": "rm -rf dist"
   },
