@@ -89,39 +89,25 @@ DATABASE_URL=postgresql://user:password@host:5432/8alls
 
 ## Deployment
 
-### Fly.io (Recommended - Free Tier)
+### Recommended: Fly.io + Supabase (Both Free)
 
-1. **Install Fly CLI:**
-```bash
-curl -L https://fly.io/install.sh | sh
-```
+**Complete guide:** See [DEPLOYMENT.md](./DEPLOYMENT.md)
 
-2. **Login:**
+**Quick steps:**
+
+1. **Create Supabase database** (https://supabase.com)
+   - Free PostgreSQL with nice UI
+   - Get connection string
+
+2. **Deploy to Fly.io:**
 ```bash
 fly auth login
-```
-
-3. **Create app:**
-```bash
-fly launch
-```
-
-4. **Set secrets:**
-```bash
-fly secrets set DATABASE_URL=postgresql://...
-fly secrets set API_KEY=your-secret-key
-```
-
-5. **Deploy:**
-```bash
+fly launch --no-deploy
+fly secrets set DATABASE_URL="your-supabase-url"
 fly deploy
 ```
 
-### Railway
-
-1. Connect GitHub repo
-2. Add environment variables
-3. Deploy automatically on push
+**Total cost: $0/month**
 
 ## Environment Variables
 
