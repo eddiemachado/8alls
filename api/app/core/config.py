@@ -14,11 +14,8 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./8alls.db"
 
-    # CORS
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ]
+    # CORS - accept comma-separated string
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
     # Environment
     ENVIRONMENT: str = "development"
@@ -26,6 +23,10 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+    def get_cors_origins_list(self) -> List[str]:
+        """Parse CORS origins from comma-separated string."""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
 
 
 settings = Settings()
