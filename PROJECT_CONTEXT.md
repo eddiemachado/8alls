@@ -8,13 +8,14 @@
 
 ## What We've Built So Far
 
-### ✅ Completed (Session 1-2)
+### ✅ Completed (Session 1-3)
 
 1. **Monorepo Structure**
    - Set up with npm workspaces
    - Turborepo for build orchestration
-   - Organized into packages/ and mcp-servers/
-   - Apps live in separate repos
+   - Organized into packages/, mcp-servers/, and api/
+   - Apps live in separate repos (external)
+   - Restructured as central connector
 
 2. **@8alls/design-tokens Package**
    - Complete design system WITHOUT Tailwind (user requirement)
@@ -46,15 +47,40 @@
    - Ready for Claude Code/Desktop
    - Location: `/mcp-servers/mcp-tasks/`
 
-5. **Documentation**
+5. **FastAPI Backend** ✅ DEPLOYED
+   - Complete REST API with task endpoints
+   - SQLAlchemy ORM with Pydantic schemas
+   - CORS middleware for external apps
+   - Auto-generated API docs (Swagger UI)
+   - Health check endpoint
+   - Universal search endpoint
+   - Location: `/api/`
+   - **Live at:** https://8alls-api.fly.dev
+   - **Docs:** https://8alls-api.fly.dev/docs
+
+6. **Production Infrastructure** ✅ DEPLOYED
+   - **Fly.io:** Hosting FastAPI backend (free tier, 256MB VM)
+   - **Supabase:** PostgreSQL database (free tier, 500MB)
+   - Auto-scaling and health checks configured
+   - HTTPS enabled automatically
+   - **Total cost:** $0/month
+
+7. **Landing Page**
+   - Simple index.html with 8 ball emoji
+   - Prevents code exposure on GitHub Pages
+   - Ready for future expansion
+   - Location: `/index.html`
+
+8. **Documentation**
    - README.md - Full project documentation
    - QUICKSTART.md - Step-by-step getting started
    - GITHUB_SETUP.md - GitHub deployment guide
+   - api/README.md - API documentation
+   - api/DEPLOYMENT.md - Fly.io + Supabase deployment guide
 
-6. **GitHub Ready**
-   - .gitignore configured
-   - .gitattributes for proper file handling
-   - GitHub Actions CI workflow
+9. **GitHub Ready**
+   - .gitignore configured (root + api/)
+   - All code committed
    - Ready to push to repository
 
 ## Architecture Philosophy
@@ -65,7 +91,7 @@
 - ✅ Shared design tokens (can be consumed by any app)
 - ✅ Shared API client (connects apps to central backend)
 - ✅ MCP servers (Claude Code integration)
-- 🔜 Central API backend (single source of truth for data)
+- ✅ Central API backend (deployed to production!)
 - 🔜 Shared utilities and helpers
 
 **Individual apps live in separate repos:**
@@ -111,38 +137,47 @@ Each app repo:
 ## Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────┐
-│         Central API Server (TO BUILD)            │
-│    FastAPI / NestJS / Go                         │
-│    Database: PostgreSQL                          │
-│    Location: This repo (api/)                    │
-└──────────────────┬──────────────────────────────┘
-                   │
-      ┌────────────┼────────────┬─────────────┐
-      │            │            │             │
-   [MCP]       [REST API]   [WebSockets]     │
-      │            │            │             │
-  Claude Code  Web Apps    Real-time      Mobile Apps
-  Claude AI   (Separate    Updates       (Separate
-               repos)                      repos)
+Production Infrastructure:
+
+┌─────────────────────────────┐     ┌─────────────────────────────┐
+│   Supabase (FREE)           │     │   Fly.io (FREE)             │
+│   PostgreSQL Database       │────▶│   FastAPI Backend           │
+│   500MB storage             │     │   https://8alls-api.fly.dev │
+│   Table Editor UI           │     │   256MB VM                  │
+└─────────────────────────────┘     └──────────────┬──────────────┘
+                                                   │
+                      ┌────────────────────────────┼────────────┐
+                      │                            │            │
+                   [MCP]                      [REST API]    [Future: WebSockets]
+                      │                            │            │
+               Claude Code/AI              External Apps    Real-time
+                (Local/Cloud)              (Separate repos)   Updates
 ```
 
 ```
-8alls/ (This Repo)
+8alls/ (This Repo) - Central Connector
 ├── packages/
-│   ├── design-tokens/    → Shared styling
-│   └── api-client/       → Shared API client
+│   ├── design-tokens/    → Shared styling (pure CSS)
+│   └── api-client/       → Shared API client (TypeScript)
 ├── mcp-servers/
 │   └── mcp-tasks/        → Claude integration
-└── api/                  → Central backend (TO BUILD)
+├── api/                  → FastAPI backend ✅ DEPLOYED
+│   ├── app/
+│   │   ├── models/       → SQLAlchemy models
+│   │   ├── routes/       → API endpoints
+│   │   ├── schemas/      → Pydantic validation
+│   │   └── core/         → Config & database
+│   ├── Dockerfile        → Container config
+│   ├── fly.toml          → Fly.io config
+│   └── DEPLOYMENT.md     → Deployment guide
+└── index.html            → Landing page (GitHub Pages)
 
-External App Repos:
-├── 8alls-task-web/
-│   └── npm install @8alls/design-tokens @8alls/api-client
-├── 8alls-calendar-desktop/
-│   └── npm install @8alls/design-tokens @8alls/api-client
-└── 8alls-health-mobile/
-    └── npm install @8alls/design-tokens @8alls/api-client
+External App Repos (TO BUILD):
+├── 8alls-task-web/          → Next.js task app (Vercel)
+├── 8alls-calendar-web/      → Next.js calendar (Vercel)
+├── 8alls-calendar-desktop/  → Electron/Tauri (GitHub Releases)
+└── 8alls-health-mobile/     → React Native (App stores)
+    └── Each installs: @8alls/design-tokens + @8alls/api-client
 ```
 
 ## Current File Structure
@@ -175,16 +210,40 @@ External App Repos:
 │       │   └── index.ts             # MCP server implementation
 │       ├── package.json
 │       └── tsconfig.json
+├── api/                             # ✅ DEPLOYED
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── config.py            # App configuration
+│   │   │   └── database.py          # Database connection
+│   │   ├── models/
+│   │   │   └── task.py              # SQLAlchemy task model
+│   │   ├── routes/
+│   │   │   ├── tasks.py             # Task CRUD endpoints
+│   │   │   └── search.py            # Search endpoint
+│   │   ├── schemas/
+│   │   │   └── task.py              # Pydantic schemas
+│   │   └── main.py                  # FastAPI application
+│   ├── venv/                        # Python virtual environment
+│   ├── requirements.txt             # Python dependencies
+│   ├── Dockerfile                   # Docker configuration
+│   ├── fly.toml                     # Fly.io configuration
+│   ├── .env.example                 # Environment template
+│   ├── .dockerignore
+│   ├── .gitignore
+│   ├── run.sh                       # Local dev script
+│   ├── README.md                    # API documentation
+│   └── DEPLOYMENT.md                # Deployment guide
 ├── .github/
 │   └── workflows/
 │       └── ci.yml                   # GitHub Actions CI
+├── index.html                       # Landing page
 ├── package.json                     # Root workspace config
 ├── turbo.json                       # Turborepo config
 ├── .gitignore
-├── .gitattributes
-├── README.md
-├── QUICKSTART.md
-└── GITHUB_SETUP.md
+├── README.md                        # Main documentation
+├── QUICKSTART.md                    # Getting started guide
+├── GITHUB_SETUP.md                  # GitHub guide
+└── PROJECT_CONTEXT.md               # This file
 ```
 
 ## Tools Planned (User's Original Request)
@@ -211,21 +270,51 @@ External App Repos:
 
 ### Phase 1: Foundation ✅ COMPLETE
 - [x] Set up monorepo
-- [x] Create design system package
+- [x] Create design system package (pure CSS, no Tailwind)
 - [x] Create API client package
-- [x] Create first MCP server
-- [x] Documentation
-- [x] Restructure for connector approach
+- [x] Create first MCP server (mcp-tasks)
+- [x] Documentation (README, QUICKSTART, GITHUB_SETUP)
+- [x] Restructure for connector approach (apps in separate repos)
+- [x] Landing page (index.html)
 
-### Phase 2: Central API (CURRENT PRIORITY)
-**Goal:** Build the backend that all apps connect to
+### Phase 2: Central API ✅ COMPLETE
+- [x] Choose backend framework (FastAPI selected)
+- [x] Build FastAPI backend with task endpoints
+- [x] Create database models (SQLAlchemy)
+- [x] Implement CRUD operations
+- [x] Add search endpoint
+- [x] Set up CORS for external apps
+- [x] Create Docker configuration
+- [x] Deploy to Fly.io (https://8alls-api.fly.dev)
+- [x] Set up Supabase PostgreSQL database
+- [x] Write deployment documentation
 
-**Decision Point:** Choose backend framework
-- **Option A: FastAPI (Python)** - Fastest development, great for solo dev
-- **Option B: NestJS (TypeScript)** - Type sharing with frontend, more boilerplate
-- **Option C: Go** - Best performance, more verbose
+### Phase 3: Build First External App (CURRENT PRIORITY)
+**Goal:** Validate the entire architecture works end-to-end
 
-**API Location:** `/api` directory in this repo
+**Next Task:** Create 8alls-task-web repository
+
+**Steps:**
+1. Create new GitHub repo: `8alls-task-web`
+2. Initialize Next.js app (no Tailwind!)
+3. Install packages from this repo:
+   ```bash
+   npm install github:eddiemachado/8alls#main
+   ```
+4. Import design tokens in layout.tsx
+5. Build task management UI using CSS variables
+6. Connect to deployed API (https://8alls-api.fly.dev/api)
+7. Test creating, listing, updating, deleting tasks
+8. Deploy to Vercel (free tier)
+
+**Why this validates everything:**
+- ✅ Design tokens work in external app
+- ✅ API client connects to production API
+- ✅ Database persists data
+- ✅ CORS works correctly
+- ✅ Full stack operational
+
+### Phase 4: MCP Server Integration (NEXT)
 
 **API Requirements:**
 ```
@@ -266,35 +355,30 @@ ORM: SQLAlchemy
 Deployment: Railway or Fly.io
 ```
 
-### Phase 3: Publish Packages
-**Goal:** Make packages available to external repos
+### Phase 4: MCP Server Integration
+**Goal:** Connect MCP server to production API
 
-**Options:**
-1. **Private npm registry** (npm, GitHub Packages)
-2. **Git dependencies** (install from GitHub directly)
-3. **Local linking** (npm link during development)
-
-**For git dependencies:**
-```json
-{
-  "dependencies": {
-    "@8alls/design-tokens": "github:eddiemachado/8alls#main",
-    "@8alls/api-client": "github:eddiemachado/8alls#main"
-  }
-}
-```
-
-### Phase 4: Build First External App
-**Goal:** Validate the connector architecture works
-
-**Recommended:** Start with task-web
-1. **Create new repo: 8alls-task-web**
-   - [ ] Initialize Next.js project
-   - [ ] Install @8alls/design-tokens
-   - [ ] Install @8alls/api-client
-   - [ ] Build task management UI
-   - [ ] Connect to API
-   - [ ] Deploy to Vercel
+**Steps:**
+1. Update MCP server to use production URL
+2. Configure Claude Desktop:
+   ```json
+   {
+     "mcpServers": {
+       "8alls-tasks": {
+         "command": "node",
+         "args": ["/path/to/8alls/mcp-servers/mcp-tasks/dist/index.js"],
+         "env": {
+           "API_BASE_URL": "https://8alls-api.fly.dev/api"
+         }
+       }
+     }
+   }
+   ```
+3. Test via Claude Desktop/Code:
+   - "List my tasks"
+   - "Create a task called 'Test' with high priority"
+   - "Mark task X as complete"
+4. Verify data persists in Supabase
 
 ### Phase 5: Build More Apps
 **Goal:** Expand the suite
@@ -600,29 +684,67 @@ npm link @8alls/api-client
 **Current Status:**
 - ✅ Foundation complete
 - ✅ Restructured for connector approach
-- ⏳ Ready to build central API
-- ⏳ Ready to create first external app
-- ⏳ Ready to deploy
+- ✅ Central API built and deployed
+- ✅ Production infrastructure operational ($0/month)
+- 🔜 Ready to create first external app
+- 🔜 Ready to update MCP server
+
+## Current Status (As of Session 3)
+
+### ✅ What's Working
+
+**Infrastructure:**
+- ✅ API is live at https://8alls-api.fly.dev
+- ✅ Database is running on Supabase (PostgreSQL)
+- ✅ Design tokens ready to consume
+- ✅ API client ready to consume
+- ✅ MCP server built (needs production URL update)
+- ✅ Landing page at 8alls.com (when GitHub Pages enabled)
+
+**You can:**
+- ✅ Create, list, search tasks via API
+- ✅ View API docs at https://8alls-api.fly.dev/docs
+- ✅ Manage database via Supabase dashboard
+- ✅ Deploy API updates with `fly deploy`
+
+**Cost: $0/month** (free tiers for everything)
+
+### 🔜 What's Next
+
+**Immediate next task:**
+1. Push code to GitHub
+2. Create first external app (8alls-task-web)
+3. Update MCP server to production URL
+4. Test full stack end-to-end
 
 ## Next Session Goals
 
-When you continue with Claude Code:
+When you continue:
 
-1. **Build the central API:**
-   - Choose framework (FastAPI recommended)
-   - Set up database (PostgreSQL)
-   - Implement endpoints
-   - Deploy to Railway/Fly.io
+**Priority 1: Create First External App (1-2 hours)**
+1. Create new repo: `8alls-task-web`
+2. Initialize Next.js (no Tailwind)
+3. Install from this repo: `npm install github:eddiemachado/8alls#main`
+4. Import design tokens and build UI
+5. Connect to production API
+6. Deploy to Vercel
 
-2. **Create first external app:**
-   - New repo: 8alls-task-web
-   - Install design tokens + API client
-   - Build task management UI
-   - Deploy to Vercel
+**This validates:**
+- Design tokens work in external app
+- API client works with production API
+- Database persists correctly
+- CORS is configured properly
+- Full architecture is operational
 
-3. **Publish packages** (optional):
-   - Publish to npm (private or public)
-   - Or continue using git dependencies
+**Priority 2: Update MCP Server (15 minutes)**
+- Point to production API
+- Test with Claude Desktop/Code
+- Verify it works with real database
+
+**Priority 3: Build More Apps**
+- Calendar app
+- Health tracker
+- Budget tool
 
 ## Questions to Answer Next Session
 
@@ -634,6 +756,8 @@ When you continue with Claude Code:
 
 ---
 
-**Last Updated:** January 31, 2026
+**Last Updated:** January 31, 2026 - Session 3
 **Current Directory:** /Users/eddiemachado/Documents/Personal/8alls
-**Ready for:** Building central API and first external app
+**Production API:** https://8alls-api.fly.dev
+**Status:** API deployed and operational, ready to build first external app
+**Cost:** $0/month (Fly.io + Supabase free tiers)
