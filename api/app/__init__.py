@@ -1,0 +1,1 @@
+"""8alls API application."""
