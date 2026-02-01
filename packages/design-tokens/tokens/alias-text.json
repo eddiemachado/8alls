@@ -1,0 +1,36 @@
+{
+  "text": {
+    "size": {
+      "display-1": { "value": "#f0f4ff" },
+      "display-2": { "value": "#e0e9ff" },
+      "display-3": { "value": "#c7d7fe" },
+      "heading-1": { "value": "#a4b8fc" },
+      "heading-2": { "value": "#8192f8" },
+      "heading-3": { "value": "#6366f1" },
+      "heading-4": { "value": "#4f46e5" },
+      "body-large": { "value": "#4338ca" },
+      "body-default": { "value": "#3730a3" },
+      "body-small": { "value": "#312e81" }
+    },
+    "line-height": {
+      "50": { "value": "100" },
+      "100": { "value": "125" },
+      "200": { "value": "140" },
+      "300": { "value": "150" },        
+      "400": { "value": "165" }
+    },
+    "weight": {
+      "bold": { "value": "700" },
+      "medium": { "value": "500" },
+      "regular": { "value": "400" },
+      "light": { "value": "200" }
+    },
+    "family": {
+      "display": { "value": "Inter" },
+      "heading": { "value": "Inter" },
+      "body": { "value": "Fira Code" },
+      "mono": { "value": "Cal Sans" }
+    }
+  }
+}
+  

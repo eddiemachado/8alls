@@ -1,0 +1,59 @@
+{
+    "color": {
+      "background": {
+        "container": { "value": "#f0f4ff" },
+        "display-2": { "value": "#e0e9ff" },
+        "display-3": { "value": "#c7d7fe" },
+        "heading-1": { "value": "#a4b8fc" },
+        "heading-2": { "value": "#8192f8" },
+        "heading-3": { "value": "#6366f1" },
+        "heading-4": { "value": "#4f46e5" },
+        "body-large": { "value": "#4338ca" },
+        "body-default": { "value": "#3730a3" },
+        "body-small": { "value": "#312e81" }
+      },
+      "border": {
+        "default": { "value": "100" },
+        "subtle": { "value": "125" },
+        "strong": { "value": "140" },
+        "inverse": { "value": "150" }, 
+        "dark": { "value": "150" },          
+        "primary": { "value": "165" }
+      },
+      "text": {
+        "default": { "value": "#171717" },
+        "subtle": { "value": "#525252" },
+        "primary": { "value": "#737373" },
+        "error": { "value": "#ef4444" },
+        "warning": { "value": "#f59e0b" },
+        "info": { "value": "#3b82f6" },
+        "success": { "value": "#059669" },
+        "disabled": { "value": "#a3a3a3" },
+        "inverse": { "value": "#ffffff" },
+        "on-primary": { "value": "#a3a3a3" },
+        "on-error": { "value": "#ffffff" },
+        "on-warning": { "value": "#ffffff" },
+        "on-info": { "value": "#ffffff" },
+        "on-success": { "value": "#ffffff" },
+        "on-disabled": { "value": "#ffffff" }
+      },
+      "icon": {
+        "default": { "value": "#171717" },
+        "subtle": { "value": "#525252" },
+        "primary": { "value": "#737373" },
+        "error": { "value": "#ef4444" },
+        "warning": { "value": "#f59e0b" },
+        "info": { "value": "#3b82f6" },
+        "success": { "value": "#059669" },
+        "disabled": { "value": "#a3a3a3" },
+        "inverse": { "value": "#ffffff" },
+        "on-primary": { "value": "#a3a3a3" },
+        "on-error": { "value": "#ffffff" },
+        "on-warning": { "value": "#ffffff" },
+        "on-info": { "value": "#ffffff" },
+        "on-success": { "value": "#ffffff" },
+        "on-disabled": { "value": "#ffffff" }
+      }
+    }
+  }
+    

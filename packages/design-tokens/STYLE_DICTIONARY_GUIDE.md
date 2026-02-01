@@ -220,28 +220,33 @@ module.exports = {
 
 ## Migration from Old System
 
-The old TypeScript-based tokens (`src/tokens/*.ts`) are being phased out in favor of Style Dictionary.
+The old TypeScript-based tokens (`src/tokens/*.ts`) have been **removed**. JSON tokens are now the only source of truth.
 
 ### What Changed
 
-**Before:**
+**Before (Old TypeScript system):**
 ```typescript
 import { colors } from '@8alls/design-tokens';
 const primary = colors.primary[500]; // "#6366f1"
 ```
 
-**After:**
+**After (JSON + generated outputs):**
 ```typescript
+// Option 1: Use generated JavaScript module
 import tokens from '@8alls/design-tokens/dist/web/tokens';
 const primary = tokens.color.primary['500'].value; // "#6366f1"
+
+// Option 2: Use CSS variables (recommended for web)
+import '@8alls/design-tokens/dist/web/variables.css';
+// Then use: var(--color-primary-500) in your CSS
 ```
 
 ### Migration Path
 
 1. ✅ JSON tokens created from TypeScript tokens
 2. ✅ Style Dictionary configured for web + iOS
-3. ⏳ Update consuming apps to use generated tokens
-4. ⏳ Remove old TypeScript token files
+3. ✅ Removed old TypeScript token files
+4. ⏳ Update consuming apps to use generated tokens
 
 ## Benefits
 
@@ -300,11 +305,11 @@ Future enhancement: Add OKLCH → RGB converter library to custom script.
 
 1. ✅ Basic Style Dictionary setup complete
 2. ✅ Custom Swift token generator with proper types and conversions
-3. ⏳ Create Swift Package for iOS distribution
-4. ⏳ Add OKLCH → RGB transformer for Swift
-5. ⏳ Add Android platform support
-6. ⏳ Set up GitHub Action for auto-generation
-7. ⏳ Deprecate old TypeScript tokens
+3. ✅ Removed legacy TypeScript tokens - JSON is now the only source of truth
+4. ⏳ Create Swift Package for iOS distribution
+5. ⏳ Add OKLCH → RGB transformer for Swift
+6. ⏳ Add Android platform support
+7. ⏳ Set up GitHub Action for auto-generation
 
 ---
 

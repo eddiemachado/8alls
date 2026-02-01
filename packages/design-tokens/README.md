@@ -46,6 +46,8 @@ const primaryColor = tokens.color.primary['500'].value; // "#6366f1"
 const baseSpacing = tokens.spacing['4'].value; // "1rem"
 ```
 
+> **Note:** Legacy TypeScript imports like `import { colors } from '@8alls/design-tokens'` have been removed. Use the generated files above instead.
+
 ### iOS (Swift)
 
 ```swift

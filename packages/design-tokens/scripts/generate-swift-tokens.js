@@ -34,6 +34,11 @@ function formatName(name) {
   return name.replace(/-/g, '_');
 }
 
+// Helper: Filter out W3C metadata keys (starting with $)
+function isTokenKey(key) {
+  return !key.startsWith('$');
+}
+
 function generateSwift() {
   console.log('🔨 Generating Swift design tokens...');
 
@@ -60,8 +65,7 @@ public extension Color {
 
   // Generate primary colors
   if (colors.color && colors.color.primary) {
-    for (const [shade, token] of Object.entries(colors.color.primary)) {
-      const hex = token.value;
+    for (const [shade, token] of Object.entries(colors.color.primary).filter(([k]) => isTokenKey(k))) {      const hex = token.$value;
       output += `        public static let primary${shade} = "${hex}"\n`;
     }
   }
@@ -73,8 +77,7 @@ public extension Color {
 
   // Generate secondary colors
   if (colors.color && colors.color.secondary) {
-    for (const [shade, token] of Object.entries(colors.color.secondary)) {
-      const hex = token.value;
+    for (const [shade, token] of Object.entries(colors.color.secondary).filter(([k]) => isTokenKey(k))) {      const hex = token.$value;
       output += `        public static let secondary${shade} = "${hex}"\n`;
     }
   }
@@ -86,8 +89,8 @@ public extension Color {
 
   // Generate semantic colors
   if (colors.color && colors.color.semantic) {
-    for (const [name, token] of Object.entries(colors.color.semantic)) {
-      output += `        public static let ${name} = "${token.value}"\n`;
+    for (const [name, token] of Object.entries(colors.color.semantic).filter(([k]) => isTokenKey(k))) {
+      output += `        public static let ${name} = "${token.$value}"\n`;
     }
   }
 
@@ -107,8 +110,8 @@ public extension Color {
       output += `
     struct ${paletteName} {
 `;
-      for (const [shade, token] of Object.entries(colors.color[palette])) {
-        output += `        public static let ${palette}${shade} = "${token.value}"\n`;
+      for (const [shade, token] of Object.entries(colors.color[palette]).filter(([k]) => isTokenKey(k))) {
+        output += `        public static let ${palette}${shade} = "${token.$value}"\n`;
       }
       output += `    }
 `;
@@ -125,8 +128,8 @@ public extension CGFloat {
 
   // Generate spacing with unit conversion
   if (spacing.spacing) {
-    for (const [name, token] of Object.entries(spacing.spacing)) {
-      const points = toPoints(token.value);
+    for (const [name, token] of Object.entries(spacing.spacing).filter(([k]) => isTokenKey(k))) {
+      const points = toPoints(token.$value);
       const varName = formatName(name);
       output += `        public static let s${varName}: CGFloat = ${points}\n`;
     }
@@ -139,8 +142,8 @@ public extension CGFloat {
 
   // Generate radius values
   if (spacing.radius) {
-    for (const [name, token] of Object.entries(spacing.radius)) {
-      const points = toPoints(token.value);
+    for (const [name, token] of Object.entries(spacing.radius).filter(([k]) => isTokenKey(k))) {
+      const points = toPoints(token.$value);
       const varName = formatName(name);
       output += `        public static let ${varName}: CGFloat = ${points}\n`;
     }
@@ -157,8 +160,8 @@ public extension CGFloat {
 
   // Generate font sizes
   if (typography.font && typography.font.size) {
-    for (const [name, token] of Object.entries(typography.font.size)) {
-      const points = toPoints(token.value);
+    for (const [name, token] of Object.entries(typography.font.size).filter(([k]) => isTokenKey(k))) {
+      const points = toPoints(token.$value);
       const varName = formatName(name);
       output += `        public static let ${varName}: CGFloat = ${points}\n`;
     }
@@ -171,8 +174,8 @@ public extension CGFloat {
 
   // Generate line heights
   if (typography.font && typography.font.lineHeight) {
-    for (const [name, token] of Object.entries(typography.font.lineHeight)) {
-      const value = parseFloat(token.value);
+    for (const [name, token] of Object.entries(typography.font.lineHeight).filter(([k]) => isTokenKey(k))) {
+      const value = parseFloat(token.$value);
       const varName = formatName(name);
       output += `        public static let ${varName}: CGFloat = ${value}\n`;
     }
@@ -187,8 +190,8 @@ public extension Int {
 
   // Generate font weights as Int
   if (typography.font && typography.font.weight) {
-    for (const [name, token] of Object.entries(typography.font.weight)) {
-      const weight = parseInt(token.value);
+    for (const [name, token] of Object.entries(typography.font.weight).filter(([k]) => isTokenKey(k))) {
+      const weight = parseInt(token.$value);
       const varName = formatName(name);
       output += `        public static let ${varName}: Int = ${weight}\n`;
     }
@@ -202,10 +205,10 @@ public struct FontFamily {
 
   // Generate font families as strings
   if (typography.font && typography.font.family) {
-    for (const [name, token] of Object.entries(typography.font.family)) {
+    for (const [name, token] of Object.entries(typography.font.family).filter(([k]) => isTokenKey(k))) {
       const varName = formatName(name);
       // Escape internal quotes for Swift string literals
-      const escapedValue = token.value.replace(/"/g, '\\"');
+      const escapedValue = token.$value.replace(/"/g, '\\"');
       output += `    public static let ${varName} = "${escapedValue}"\n`;
     }
   }
@@ -220,8 +223,8 @@ public extension TimeInterval {
 
   // Generate animation durations with ms → seconds conversion
   if (animation.animation && animation.animation.duration) {
-    for (const [name, token] of Object.entries(animation.animation.duration)) {
-      const seconds = toSeconds(token.value);
+    for (const [name, token] of Object.entries(animation.animation.duration).filter(([k]) => isTokenKey(k))) {
+      const seconds = toSeconds(token.$value);
       const varName = formatName(name);
       output += `        public static let ${varName}: TimeInterval = ${seconds}\n`;
     }
@@ -235,9 +238,9 @@ public struct Easing {
 
   // Generate easing functions as strings
   if (animation.animation && animation.animation.easing) {
-    for (const [name, token] of Object.entries(animation.animation.easing)) {
+    for (const [name, token] of Object.entries(animation.animation.easing).filter(([k]) => isTokenKey(k))) {
       const varName = formatName(name);
-      output += `    public static let ${varName} = "${token.value}"\n`;
+      output += `    public static let ${varName} = "${token.$value}"\n`;
     }
   }
 
@@ -250,9 +253,9 @@ public struct Shadow {
 
   // Generate shadows as strings
   if (spacing.shadow) {
-    for (const [name, token] of Object.entries(spacing.shadow)) {
+    for (const [name, token] of Object.entries(spacing.shadow).filter(([k]) => isTokenKey(k))) {
       const varName = formatName(name);
-      output += `    public static let ${varName} = "${token.value}"\n`;
+      output += `    public static let ${varName} = "${token.$value}"\n`;
     }
   }
 
@@ -266,8 +269,8 @@ public extension Int {
 
   // Generate z-index values
   if (spacing.zIndex) {
-    for (const [name, token] of Object.entries(spacing.zIndex)) {
-      const value = parseInt(token.value);
+    for (const [name, token] of Object.entries(spacing.zIndex).filter(([k]) => isTokenKey(k))) {
+      const value = parseInt(token.$value);
       const varName = formatName(name);
       output += `        public static let ${varName}: Int = ${value}\n`;
     }
