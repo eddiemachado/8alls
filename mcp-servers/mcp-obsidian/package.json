@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@8alls/api-client": "*",
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "chokidar": "^3.6.0",
     "gray-matter": "^4.0.3",
     "dotenv": "^16.4.0"
