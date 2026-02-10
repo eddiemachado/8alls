@@ -1,0 +1,27 @@
+{
+  "name": "@8alls/mcp-obsidian",
+  "version": "1.0.0",
+  "description": "MCP server for Obsidian vault integration with 8alls",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "8alls-mcp-obsidian": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "inspector": "npx @modelcontextprotocol/inspector dist/index.js"
+  },
+  "dependencies": {
+    "@8alls/api-client": "*",
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "chokidar": "^3.6.0",
+    "gray-matter": "^4.0.3",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
