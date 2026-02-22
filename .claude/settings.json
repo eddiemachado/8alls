@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm audit:*)",
-      "Read(//Users/eddiemachado/Documents/Personal/Obsidian/8alls/**)"
+      "Read(//Users/eddiemachado/Documents/Personal/Obsidian/8alls/**)",
+      "Bash(source:*)",
+      "Bash(python3:*)"
     ],
     "additionalDirectories": [
       "/Users/eddiemachado/Documents/Personal/Obsidian/8alls/API",

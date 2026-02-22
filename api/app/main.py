@@ -5,7 +5,7 @@ import logging
 
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.routes import tasks, search, events, websocket, daily_notes
+from app.routes import tasks, search, events, websocket, daily_notes, therapy_companion
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +42,7 @@ app.include_router(search.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
 app.include_router(websocket.router)
 app.include_router(daily_notes.router, prefix="/api")
+app.include_router(therapy_companion.router, prefix="/api")
 
 
 @app.get("/")

@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     # CORS - accept comma-separated string
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
+    # Obsidian vault — set to enable direct file writing from the API
+    VAULT_PATH: str = ""
+
     # Environment
     ENVIRONMENT: str = "development"
 
