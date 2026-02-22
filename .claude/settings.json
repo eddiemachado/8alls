@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Read(//Users/eddiemachado/Documents/Personal/Obsidian/8alls/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/eddiemachado/Documents/Personal/Obsidian/8alls/API",
+      "/Users/eddiemachado/Documents/Personal/Obsidian/8alls/Design System",
+      "/Users/eddiemachado/Documents/Personal/Obsidian/8alls"
     ]
   }
 }
